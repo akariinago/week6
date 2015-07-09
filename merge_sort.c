@@ -139,7 +139,7 @@ int main(int argc, char** argv){
         return -1;
     }
     
-     //1GB分のデータずつ整列し、１０個のファイルに書き込む(2/10)
+     //1GB分のデータずつ整列し、１０個のファイルに書き込む
     sort_and_array(fp, size, "sort1");
     sort_and_array(fp, size, "sort2");
     sort_and_array(fp, size, "sort3");
