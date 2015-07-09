@@ -5,6 +5,12 @@
 
 void QSort(int x[ ], int left, int right);
 void Swap(int x[ ], int i, int j);
+void sort_and_array(FILE* fp, int size, char* file);
+void merge_file(char* file1, char* file2, char* file3);  // file1とfile2をマージしてfile3を作る
+
+int* array = (int*)malloc(1000*1000*1000);
+int* buffer = (int*)malloc(1000 * 1000);
+
 
 void QSort(int x[ ], int left, int right)
 {
@@ -47,12 +53,73 @@ void Swap(int x[ ], int i, int j)
     x[j] = temp;
 }
 
+void sort_and_array(FILE* fp, int size, char* file, int* array, int* buffer){
+    int i,j;
+    int count=0;
+    FILE* fp2 = fopen(file, "wb");
+    
+    while(count!=250*1000*1000){
+        fread(&(array[count]), sizeof(int), 1, fp);
+        count++;
+        printf("%d\n",array[count]);
+    }
+    
+    QSort(array, 0, 250*1000*1000-1);//内部整列する
+    
+    for (i = 0; i < size; i++) {
+        int num =  100*1000/ sizeof(int);
+        for (j = 0; j < num; j++) {
+            buffer[j] = array[j];
+        }
+        size_t ret = fwrite(buffer, sizeof(int), num, fp2);
+        if (ret != num) {
+            printf("error: Failed in writing bytes to the file sort6\n");
+            exit(1);
+        }
+    }
+    
+    fclose(fp2);
+    
+    
+}
+void merge_file(char* file1, char* file2, char* file3){
+    int a, b;
+    FILE* fp1 = fopen(file1, "rb");
+    FILE* fp2 = fopen(file2, "rb");
+    FILE* fpmerge1 = fopen(file3, "wb");//マージしたデータを入れるファイル
+    
+    fread(&a, sizeof(int), 1, fp1);
+    fread(&b, sizeof(int), 1, fp2);
+    while(a!=0&&b!=0){
+        if (a<=b) {
+            fwrite(&a, sizeof(int), 1, fpmerge1);
+            fread(&a, sizeof(int), 1, fp1);
+        }
+        else{
+            fwrite(&b, sizeof(int), 1, fpmerge1);
+            fread(&b, sizeof(int), 1, fp2);
+        }
+    }
+    if(a==0){
+        while(b!=0){
+            fwrite(&b, sizeof(int), 1, fpmerge1);
+            fread(&b, sizeof(int), 1, fp2);
+        }
+    }
+    else{
+        while(b!=0){
+            fwrite(&a, sizeof(int), 1, fpmerge1);
+            fread(&a, sizeof(int), 1, fp1);
+        }
+    }
+    fclose(fp1);
+    fclose(fp2);
+    fclose(fpmerge1);
+    }
 
 int main(int argc, char** argv){
-    int *array;
-    array = (int*)malloc(1000*1000*1000);
-      int count;
-    
+ 
+
     if(array == 0) {
         fprintf(stderr, "メモリ確保エラー\n");
         exit(1);
@@ -71,534 +138,36 @@ int main(int argc, char** argv){
         printf("error: Cannot open file %s\n", filename);
         return -1;
     }
-    //1GB分のデータを整列し、ファイルに書き込む(1/10)
-    count = 0;
-    while(count!=250*1000*1000){
-        fread(&(array[count]), sizeof(int), 1, fp);
-        count++;
-        printf("%d\n",array[count]);
-    }
     
-    QSort(array, 0, 250*1000*1000-1);
-
-    FILE* fp2 = fopen("sort1", "wb");
-    int i, j;
-    int* buffer = (int*)malloc(100*1000);
-    for (i = 0; i < size; i++) {
-        int num =  100*1000/ sizeof(int);
-        for (j = 0; j < num; j++) {
-            buffer[j] = array[j];
-        }
-        size_t ret = fwrite(buffer, sizeof(int), num, fp2);
-        if (ret != num) {
-            printf("error: Failed in writing bytes to the file sort1\n");
-            return -1;
-        }
-    }
-    fclose(fp2);
-
-    //1GB分のデータを整列し、ファイルに書き込む(2/10)
-    count = 0;
-    while(count!=250*1000*1000){
-        fread(&(array[count]), sizeof(int), 1, fp);
-        count++;
-        printf("%d\n",array[count]);
-    }
-    
-    QSort(array, 0, 250*1000*1000-1);
-    
-    FILE* fp3 = fopen("sort2", "wb");
-    for (i = 0; i < size; i++) {
-        int num =  100*1000/ sizeof(int);
-        for (j = 0; j < num; j++) {
-            buffer[j] = array[j];
-        }
-        size_t ret = fwrite(buffer, sizeof(int), num, fp3);
-        if (ret != num) {
-            printf("error: Failed in writing bytes to the file sort2\n");
-            return -1;
-        }
-    }
-    fclose(fp3);
-    
-    //1GB分のデータを整列し、ファイルに書き込む(3/10)
-    count = 0;
-    while(count!=250*1000*1000){
-        fread(&(array[count]), sizeof(int), 1, fp);
-        count++;
-        printf("%d\n",array[count]);
-    }
-    
-    QSort(array, 0, 250*1000*1000-1);
-    
-    FILE* fp4 = fopen("sort3", "wb");
-    for (i = 0; i < size; i++) {
-        int num =  100*1000/ sizeof(int);
-        for (j = 0; j < num; j++) {
-            buffer[j] = array[j];
-        }
-        size_t ret = fwrite(buffer, sizeof(int), num, fp4);
-        if (ret != num) {
-            printf("error: Failed in writing bytes to the file sort3\n");
-            return -1;
-        }
-    }
-    fclose(fp4);
-    //1GB分のデータを整列し、ファイルに書き込む(4/10)
-    count = 0;
-    while(count!=250*1000*1000){
-        fread(&(array[count]), sizeof(int), 1, fp);
-        count++;
-        printf("%d\n",array[count]);
-    }
-    
-    QSort(array, 0, 250*1000*1000-1);
-    
-    FILE* fp5 = fopen("sort4", "wb");
-    for (i = 0; i < size; i++) {
-        int num =  100*1000/ sizeof(int);
-        for (j = 0; j < num; j++) {
-            buffer[j] = array[j];
-        }
-        size_t ret = fwrite(buffer, sizeof(int), num, fp5);
-        if (ret != num) {
-            printf("error: Failed in writing bytes to the file sort4\n");
-            return -1;
-        }
-    }
-    fclose(fp5);
-    //1GB分のデータを整列し、ファイルに書き込む(5/10)
-    count = 0;
-    while(count!=250*1000*1000){
-        fread(&(array[count]), sizeof(int), 1, fp);
-        count++;
-        printf("%d\n",array[count]);
-    }
-    
-    QSort(array, 0, 250*1000*1000-1);
-    
-    FILE* fp6 = fopen("sort5", "wb");
-    for (i = 0; i < size; i++) {
-        int num =  100*1000/ sizeof(int);
-        for (j = 0; j < num; j++) {
-            buffer[j] = array[j];
-        }
-        size_t ret = fwrite(buffer, sizeof(int), num, fp6);
-        if (ret != num) {
-            printf("error: Failed in writing bytes to the file sort5\n");
-            return -1;
-        }
-    }
-    fclose(fp6);
-    //1GB分のデータを整列し、ファイルに書き込む(6/10)
-    count = 0;
-    while(count!=250*1000*1000){
-        fread(&(array[count]), sizeof(int), 1, fp);
-        count++;
-        printf("%d\n",array[count]);
-    }
-    
-    QSort(array, 0, 250*1000*1000-1);
-    
-    FILE* fp7 = fopen("sort6", "wb");
-    for (i = 0; i < size; i++) {
-        int num =  100*1000/ sizeof(int);
-        for (j = 0; j < num; j++) {
-            buffer[j] = array[j];
-        }
-        size_t ret = fwrite(buffer, sizeof(int), num, fp7);
-        if (ret != num) {
-            printf("error: Failed in writing bytes to the file sort6\n");
-            return -1;
-        }
-    }
-    fclose(fp7);
-    //1GB分のデータを整列し、ファイルに書き込む(7/10)
-    count = 0;
-    while(count!=250*1000*1000){
-        fread(&(array[count]), sizeof(int), 1, fp);
-        count++;
-        printf("%d\n",array[count]);
-    }
-    
-    QSort(array, 0, 250*1000*1000-1);
-    
-    FILE* fp8 = fopen("sort7", "wb");
-    for (i = 0; i < size; i++) {
-        int num =  100*1000/ sizeof(int);
-        for (j = 0; j < num; j++) {
-            buffer[j] = array[j];
-        }
-        size_t ret = fwrite(buffer, sizeof(int), num, fp8);
-        if (ret != num) {
-            printf("error: Failed in writing bytes to the file sort7\n");
-            return -1;
-        }
-    }
-    fclose(fp8);
-    //1GB分のデータを整列し、ファイルに書き込む(8/10)
-    count = 0;
-    while(count!=250*1000*1000){
-        fread(&(array[count]), sizeof(int), 1, fp);
-        count++;
-        printf("%d\n",array[count]);
-    }
-    
-    QSort(array, 0, 250*1000*1000-1);
-    
-    FILE* fp9 = fopen("sort8", "wb");
-    for (i = 0; i < size; i++) {
-        int num =  100*1000/ sizeof(int);
-        for (j = 0; j < num; j++) {
-            buffer[j] = array[j];
-        }
-        size_t ret = fwrite(buffer, sizeof(int), num, fp9);
-        if (ret != num) {
-            printf("error: Failed in writing bytes to the file sort8\n");
-            return -1;
-        }
-    }
-    fclose(fp9);
-    //1GB分のデータを整列し、ファイルに書き込む(9/10)
-    count = 0;
-    while(count!=250*1000*1000){
-        fread(&(array[count]), sizeof(int), 1, fp);
-        count++;
-        printf("%d\n",array[count]);
-    }
-    
-    QSort(array, 0, 250*1000*1000-1);
-    
-    FILE* fp10 = fopen("sort9", "wb");
-    for (i = 0; i < size; i++) {
-        int num =  100*1000/ sizeof(int);
-        for (j = 0; j < num; j++) {
-            buffer[j] = array[j];
-        }
-        size_t ret = fwrite(buffer, sizeof(int), num, fp10);
-        if (ret != num) {
-            printf("error: Failed in writing bytes to the file sort9\n");
-            return -1;
-        }
-    }
-    fclose(fp10);
-    //1GB分のデータを整列し、ファイルに書き込む(10/10)
-    count = 0;
-    while(count!=250*1000*1000){
-        fread(&(array[count]), sizeof(int), 1, fp);
-        count++;
-        printf("%d\n",array[count]);
-    }
-    
-    QSort(array, 0, 250*1000*1000-1);
-    
-    FILE* fp11 = fopen("sort10", "wb");
-    for (i = 0; i < size; i++) {
-        int num =  100*1000/ sizeof(int);
-        for (j = 0; j < num; j++) {
-            buffer[j] = array[j];
-        }
-        size_t ret = fwrite(buffer, sizeof(int), num, fp11);
-        if (ret != num) {
-            printf("error: Failed in writing bytes to the file sort10\n");
-            return -1;
-        }
-    }
-    fclose(fp11);
+     //1GB分のデータずつ整列し、１０個のファイルに書き込む(2/10)
+    sort_and_array(fp, size, "sort1");
+    sort_and_array(fp, size, "sort2");
+    sort_and_array(fp, size, "sort3");
+    sort_and_array(fp, size, "sort4");
+    sort_and_array(fp, size, "sort5");
+    sort_and_array(fp, size, "sort6");
+    sort_and_array(fp, size, "sort7");
+    sort_and_array(fp, size, "sort8");
+    sort_and_array(fp, size, "sort9");
+    sort_and_array(fp, size, "sort10");
     fclose(fp);
     free(array);
     free(buffer);
     
-    //１０個にわかれたデータを２個ずつマージする
-    int a, b;
-    FILE* fpr2 = fopen("sort1", "rb");
-    FILE* fpr3 = fopen("sort2", "rb");
-    FILE* fpmerge1 = fopen("merge1", "wb");//マージしたデータを入れるファイル
+    //10個にわかれた1KBのデータをマージする
+    merge_file("sort1", "sort2", "merge1_1");
+    merge_file("sort3", "sort4", "merge1_2");
+    merge_file("sort5", "sort6", "merge1_3");
+    merge_file("sort7", "sort8", "merge1_4");
+    merge_file("sort9", "sort10", "merge1_5");
     
-    fread(&a, sizeof(int), 1, fpr2);
-    fread(&b, sizeof(int), 1, fpr3);
-    while(a!=0&&b!=0){
-    if (a<=b) {
-        fwrite(&a, sizeof(int), 1, fpmerge1);
-        fread(&a, sizeof(int), 1, fpr2);
-    }
-    else{
-        fwrite(&b, sizeof(int), 1, fpmerge1);
-        fread(&b, sizeof(int), 1, fpr3);
-    }
-    }
-    if(a==0){
-        while(b!=0){
-        fwrite(&b, sizeof(int), 1, fpmerge1);
-        fread(&b, sizeof(int), 1, fpr3);
-        }
-    }
-    else{
-        while(b!=0){
-        fwrite(&a, sizeof(int), 1, fpmerge1);
-        fread(&a, sizeof(int), 1, fpr2);
-        }
-    }
-    fclose(fpr2);
-    fclose(fpr3);
-    fclose(fpmerge1);
+    //5個にわかれた２KBのデータをマージする
+    merge_file("merge1_1", "merge1_2", "merge2_1");
+    merge_file("merge1_3", "merge1_4", "merge2_2");
+    merge_file("merge2_1", "merge1_5", "merge2_3");
     
-    FILE* fpr4 = fopen("sort3", "rb");
-    FILE* fpr5 = fopen("sort4", "rb");
-    FILE* fpmerge2 = fopen("merge2", "wb");//マージしたデータを入れるファイル
-    
-    fread(&a, sizeof(int), 1, fpr4);
-    fread(&b, sizeof(int), 1, fpr5);
-    while(a!=0&&b!=0){
-        if (a<=b) {
-            fwrite(&a, sizeof(int), 1, fpmerge2);
-            fread(&a, sizeof(int), 1, fpr4);
-        }
-        else{
-            fwrite(&b, sizeof(int), 1, fpmerge2);
-            fread(&b, sizeof(int), 1, fpr5);
-        }
-    }
-    if(a==0){
-        while(b!=0){
-            fwrite(&b, sizeof(int), 1, fpmerge2);
-            fread(&b, sizeof(int), 1, fpr5);
-        }
-    }
-    else{
-        while(b!=0){
-            fwrite(&a, sizeof(int), 1, fpmerge2);
-            fread(&a, sizeof(int), 1, fpr4);
-        }
-    }
-    fclose(fpr4);
-    fclose(fpr5);
-    fclose(fpmerge2);
-    
-    FILE* fpr6 = fopen("sort5", "rb");
-    FILE* fpr7 = fopen("sort6", "rb");
-    FILE* fpmerge3 = fopen("merge3", "wb");//マージしたデータを入れるファイル
-
-    fread(&a, sizeof(int), 1, fpr6);
-    fread(&b, sizeof(int), 1, fpr7);
-    while(a!=0&&b!=0){
-        if (a<=b) {
-            fwrite(&a, sizeof(int), 1, fpmerge3);
-            fread(&a, sizeof(int), 1, fpr6);
-        }
-        else{
-            fwrite(&b, sizeof(int), 1, fpmerge3);
-            fread(&b, sizeof(int), 1, fpr7);
-        }
-    }
-    if(a==0){
-        while(b!=0){
-            fwrite(&b, sizeof(int), 1, fpmerge3);
-            fread(&b, sizeof(int), 1, fpr7);
-        }
-    }
-    else{
-        while(b!=0){
-            fwrite(&a, sizeof(int), 1, fpmerge3);
-            fread(&a, sizeof(int), 1, fpr6);
-        }
-    }
-    fclose(fpr6);
-    fclose(fpr7);
-    fclose(fpmerge3);
-    
-    FILE* fpr8 = fopen("sort7", "rb");
-    FILE* fpr9 = fopen("sort8", "rb");
-    FILE* fpmerge4 = fopen("merge4", "wb");//マージしたデータを入れるファイル
-    
-    fread(&a, sizeof(int), 1, fpr8);
-    fread(&b, sizeof(int), 1, fpr9);
-    while(a!=0&&b!=0){
-        if (a<=b) {
-            fwrite(&a, sizeof(int), 1, fpmerge4);
-            fread(&a, sizeof(int), 1, fpr8);
-        }
-        else{
-            fwrite(&b, sizeof(int), 1, fpmerge4);
-            fread(&b, sizeof(int), 1, fpr9);
-        }
-    }
-    if(a==0){
-        while(b!=0){
-            fwrite(&b, sizeof(int), 1, fpmerge4);
-            fread(&b, sizeof(int), 1, fpr9);
-        }
-    }
-    else{
-        while(b!=0){
-            fwrite(&a, sizeof(int), 1, fpmerge4);
-            fread(&a, sizeof(int), 1, fpr8);
-        }
-    }
-    fclose(fpr8);
-    fclose(fpr9);
-    fclose(fpmerge4);
-
-    FILE* fpr10 = fopen("sort9", "rb");
-    FILE* fpr11 = fopen("sort10", "rb");
-    FILE* fpmerge5 = fopen("merge5", "wb");//マージしたデータを入れるファイル
-    
-    fread(&a, sizeof(int), 1, fpr10);
-    fread(&b, sizeof(int), 1, fpr11);
-    while(a!=0&&b!=0){
-        if (a<=b) {
-            fwrite(&a, sizeof(int), 1, fpmerge5);
-            fread(&a, sizeof(int), 1, fpr10);
-        }
-        else{
-            fwrite(&b, sizeof(int), 1, fpmerge5);
-            fread(&b, sizeof(int), 1, fpr11);
-        }
-    }
-    if(a==0){
-        while(b!=0){
-            fwrite(&b, sizeof(int), 1, fpmerge5);
-            fread(&b, sizeof(int), 1, fpr10);
-        }
-    }
-    else{
-        while(b!=0){
-            fwrite(&a, sizeof(int), 1, fpmerge5);
-            fread(&a, sizeof(int), 1, fpr11);
-        }
-    }
-    fclose(fpr10);
-    fclose(fpr11);
-    fclose(fpmerge5);
-    
-     //５個にわかれたデータをマージする
-    FILE* fpr12 = fopen("merge1", "rb");
-    FILE* fpr13 = fopen("merge2", "rb");
-    FILE* fpmerge6 = fopen("merge6", "wb");//マージしたデータを入れるファイル
-    
-    fread(&a, sizeof(int), 1, fpr12);
-    fread(&b, sizeof(int), 1, fpr13);
-    while(a!=0&&b!=0){
-        if (a<=b) {
-            fwrite(&a, sizeof(int), 1, fpmerge6);
-            fread(&a, sizeof(int), 1, fpr12);
-        }
-        else{
-            fwrite(&b, sizeof(int), 1, fpmerge6);
-            fread(&b, sizeof(int), 1, fpr13);
-        }
-    }
-    if(a==0){
-        while(b!=0){
-            fwrite(&b, sizeof(int), 1, fpmerge6);
-            fread(&b, sizeof(int), 1, fpr13);
-        }
-    }
-    else{
-        while(b!=0){
-            fwrite(&a, sizeof(int), 1, fpmerge6);
-            fread(&a, sizeof(int), 1, fpr12);
-        }
-    }
-    fclose(fpr12);
-    fclose(fpr13);
-    fclose(fpmerge6);
-    
-    FILE* fpr14 = fopen("merge3", "rb");
-    FILE* fpr15 = fopen("merge4", "rb");
-    FILE* fpmerge7 = fopen("merge7", "wb");//マージしたデータを入れるファイル
-    
-    fread(&a, sizeof(int), 1, fpr14);
-    fread(&b, sizeof(int), 1, fpr15);
-    while(a!=0&&b!=0){
-        if (a<=b) {
-            fwrite(&a, sizeof(int), 1, fpmerge7);
-            fread(&a, sizeof(int), 1, fpr14);
-        }
-        else{
-            fwrite(&b, sizeof(int), 1, fpmerge7);
-            fread(&b, sizeof(int), 1, fpr15);
-        }
-    }
-    if(a==0){
-        while(b!=0){
-            fwrite(&b, sizeof(int), 1, fpmerge7);
-            fread(&b, sizeof(int), 1, fpr15);
-        }
-    }
-    else{
-        while(b!=0){
-            fwrite(&a, sizeof(int), 1, fpmerge7);
-            fread(&a, sizeof(int), 1, fpr14);
-        }
-    }
-    fclose(fpr14);
-    fclose(fpr15);
-    fclose(fpmerge7);
-    
-    FILE* fpr16 = fopen("merge5", "rb");
-    FILE* fpr17 = fopen("merge6", "rb");
-    FILE* fpmerge8 = fopen("merge8", "wb");//マージしたデータを入れるファイル
-    
-    fread(&a, sizeof(int), 1, fpr16);
-    fread(&b, sizeof(int), 1, fpr17);
-    while(a!=0&&b!=0){
-        if (a<=b) {
-            fwrite(&a, sizeof(int), 1, fpmerge8);
-            fread(&a, sizeof(int), 1, fpr16);
-        }
-        else{
-            fwrite(&b, sizeof(int), 1, fpmerge8);
-            fread(&b, sizeof(int), 1, fpr17);
-        }
-    }
-    if(a==0){
-        while(b!=0){
-            fwrite(&b, sizeof(int), 1, fpmerge8);
-            fread(&b, sizeof(int), 1, fpr17);
-        }
-    }
-    else{
-        while(b!=0){
-            fwrite(&a, sizeof(int), 1, fpmerge8);
-            fread(&a, sizeof(int), 1, fpr16);
-        }
-    }
-    fclose(fpr16);
-    fclose(fpr17);
-    fclose(fpmerge8);
-    
-    FILE* fpr18 = fopen("merge7", "rb");
-    FILE* fpr19 = fopen("merge8", "rb");
-    FILE* fpmerge9 = fopen("result10000", "wb");//マージしたデータを入れるファイル
-    
-    fread(&a, sizeof(int), 1, fpr18);
-    fread(&b, sizeof(int), 1, fpr19);
-    while(a!=0&&b!=0){
-        if (a<=b) {
-            fwrite(&a, sizeof(int), 1, fpmerge9);
-            fread(&a, sizeof(int), 1, fpr18);
-        }
-        else{
-            fwrite(&b, sizeof(int), 1, fpmerge9);
-            fread(&b, sizeof(int), 1, fpr19);
-        }
-    }
-    if(a==0){
-        while(b!=0){
-            fwrite(&b, sizeof(int), 1, fpmerge9);
-            fread(&b, sizeof(int), 1, fpr19);
-        }
-    }
-    else{
-        while(b!=0){
-            fwrite(&a, sizeof(int), 1, fpmerge9);
-            fread(&a, sizeof(int), 1, fpr18);
-        }
-    }
-    fclose(fpr16);
-    fclose(fpr17);
-    fclose(fpmerge8);
+    //２個にわかれた４KBと6KBのデータをマージする
+    merge_file("merge2_2", "merge2_3", "result10000");
 
     return 0;
     
