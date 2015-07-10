@@ -8,8 +8,7 @@ void Swap(int x[ ], int i, int j);
 void sort_and_array(FILE* fp, int size, char* file);
 void merge_file(char* file1, char* file2, char* file3);  // file1とfile2をマージしてfile3を作る
 
-int* array = (int*)malloc(1000*1000*1000);
-int* buffer = (int*)malloc(1000 * 1000);
+
 
 
 void QSort(int x[ ], int left, int right)
@@ -53,7 +52,17 @@ void Swap(int x[ ], int i, int j)
     x[j] = temp;
 }
 
-void sort_and_array(FILE* fp, int size, char* file, int* array, int* buffer){
+void sort_and_array(FILE* fp, int size, char* file){
+    int* array = (int*)malloc(1000*1000*1000);
+    int* buffer = (int*)malloc(1000 * 1000);
+    if(array == 0) {
+        fprintf(stderr, "メモリ確保エラー\n");
+        exit(1);
+    }
+    if(buffer == 0) {
+        fprintf(stderr, "メモリ確保エラー\n");
+        exit(1);
+    }
     int i,j;
     int count=0;
     FILE* fp2 = fopen(file, "wb");
@@ -77,7 +86,8 @@ void sort_and_array(FILE* fp, int size, char* file, int* array, int* buffer){
             exit(1);
         }
     }
-    
+    free(array);
+    free(buffer);
     fclose(fp2);
     
     
@@ -119,11 +129,6 @@ void merge_file(char* file1, char* file2, char* file3){
 
 int main(int argc, char** argv){
  
-
-    if(array == 0) {
-        fprintf(stderr, "メモリ確保エラー\n");
-        exit(1);
-    }
     
     if (argc != 3) {
         printf("usage: %s <filename> <size (MB)>\n", argv[0]);
@@ -151,8 +156,6 @@ int main(int argc, char** argv){
     sort_and_array(fp, size, "sort9");
     sort_and_array(fp, size, "sort10");
     fclose(fp);
-    free(array);
-    free(buffer);
     
     //10個にわかれた1KBのデータをマージする
     merge_file("sort1", "sort2", "merge1_1");
